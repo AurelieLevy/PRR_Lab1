@@ -9,7 +9,7 @@ package syncroheure;
  *
  * @author aurel
  */
-public class SyncroHeure {
+public class SyncroHeure_Slave {
 
    /**
     * @param args the command line arguments
