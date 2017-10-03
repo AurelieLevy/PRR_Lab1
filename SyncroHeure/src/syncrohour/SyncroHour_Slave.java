@@ -5,6 +5,10 @@
  */
 package syncrohour;
 
+import java.net.SocketException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author aurel
@@ -29,15 +33,20 @@ public class SyncroHour_Slave {
       }
    }
    
-   public double calculDiff(){
+   /*public double calculDiff(){
       
-   }
+   }*/
 
    /**
     * @param args the command line arguments
     */
    public static void main(String[] args) {
-      // TODO code application logic here
+      try {
+         Thread threadCommunication = new Thread(new MessageManager(2222, "NADIR-PC"));
+         threadCommunication.start();
+      } catch (SocketException ex) {
+         System.err.println("Thread not created!");
+      }
    }
 
 }
