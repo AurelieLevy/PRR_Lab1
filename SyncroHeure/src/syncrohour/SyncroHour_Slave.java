@@ -22,7 +22,6 @@ public class SyncroHour_Slave {
    private byte[] slaveDelay;
    
    
-   
    public SyncroHour_Slave(String name){
       if(name == null || name == ""){
          System.err.println("slave's name missing");
@@ -32,21 +31,21 @@ public class SyncroHour_Slave {
          nameSlave = name;
       }
    }
-   
-   /*public double calculDiff(){
-      
-   }*/
 
    /**
     * @param args the command line arguments
     */
    public static void main(String[] args) {
-      try {
+      /*try {
          Thread threadCommunication = new Thread(new MessageManager(2222, "NADIR-PC"));
-         threadCommunication.start();
-      } catch (SocketException ex) {
+         threadCommunication.start();*/
+      multicastManager mm = new multicastManager(2223, "multicast1", "239.10.10.1");
+      mm.run();
+         //Thread threadMulticastComm = new Thread(new multicastManager(2223, "multicast1", "239.10.10.1"));
+         //threadMulticastComm.start();
+      /*} catch (SocketException ex) {
          System.err.println("Thread not created!");
-      }
+      }*/
    }
 
 }
