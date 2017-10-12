@@ -19,6 +19,7 @@ public class MessageManager implements Runnable {
    private final int PORT;
    private final String NAME_MASTER;
    private DatagramSocket socket;
+   private double timeMaster;
 
    public MessageManager(int port, String name) throws SocketException {
       this.PORT = port;
@@ -50,6 +51,13 @@ public class MessageManager implements Runnable {
          packet = new DatagramPacket(buffer, buffer.length);
          socket.receive(packet);
          String messageRecieved = new String(packet.getData());
+         
+         //envoi timeMaster
+         
+         
+         
+         
+         
          System.out.println("Message recu: " + messageRecieved);
          socket.close();
 

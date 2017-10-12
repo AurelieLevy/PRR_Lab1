@@ -12,15 +12,13 @@ import java.net.MulticastSocket;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author aurel
- */
+
 public class multicastManager implements Runnable {
 
    private final int PORT;
    private final String NAME_MASTER;
    private final String ADDRESS_GROUP;
+   private double timeMaster;
 
    public multicastManager(int port, String name, String addGrp) {
       this.PORT = port;
@@ -35,7 +33,12 @@ public class multicastManager implements Runnable {
    public int getPORT(){
       return PORT;
    }
-
+   
+   public double getTimeMaster(){
+      return timeMaster;
+   }
+   
+   
    @Override
    public void run() {
       byte[] buffer = new byte[256];
@@ -47,6 +50,14 @@ public class multicastManager implements Runnable {
          DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
          socket.receive(packet);
          String messageRecieved = new String(packet.getData());
+         
+         //envoi timeMaster
+         
+         
+         
+         
+         
+         
          System.out.println("Diffusion client: Message recu: " + messageRecieved);
          
          socket.leaveGroup(groupe);

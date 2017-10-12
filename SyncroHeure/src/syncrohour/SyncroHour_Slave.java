@@ -5,9 +5,6 @@
  */
 package syncrohour;
 
-import java.net.SocketException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -20,16 +17,24 @@ public class SyncroHour_Slave {
    private byte[] slaveTime;
    private byte[] slaveDifference;
    private byte[] slaveDelay;
-   
-   
-   public SyncroHour_Slave(String name){
-      if(name == null || name == ""){
+
+   public SyncroHour_Slave(String name) {
+      if (name == null || name == "") {
          System.err.println("slave's name missing");
          throw new Error("invalid Parameter");
-      }
-      else{
+      } else {
          nameSlave = name;
       }
+   }
+
+   //écart
+   private double calculGap(double timeMaster, double timeSlave) {
+      return (timeMaster - timeSlave);
+   }
+
+   //délai
+   private double calculDelay(double timeMaster, double timeSlave) {
+      return ((timeMaster - timeSlave) / 2);
    }
 
    /**
@@ -41,8 +46,8 @@ public class SyncroHour_Slave {
          threadCommunication.start();*/
       multicastManager mm = new multicastManager(2223, "multicast1", "239.10.10.1");
       mm.run();
-         //Thread threadMulticastComm = new Thread(new multicastManager(2223, "multicast1", "239.10.10.1"));
-         //threadMulticastComm.start();
+      //Thread threadMulticastComm = new Thread(new multicastManager(2223, "multicast1", "239.10.10.1"));
+      //threadMulticastComm.start();
       /*} catch (SocketException ex) {
          System.err.println("Thread not created!");
       }*/
