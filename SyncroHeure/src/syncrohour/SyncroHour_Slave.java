@@ -5,6 +5,9 @@
  */
 package syncrohour;
 
+import java.util.Date;
+import java.util.Timer;
+
 
 /**
  *
@@ -17,6 +20,7 @@ public class SyncroHour_Slave {
    private byte[] slaveTime;
    private byte[] slaveDifference;
    private byte[] slaveDelay;
+   private Date systHour;
 
    public SyncroHour_Slave(String name) {
       if (name == null || name == "") {
@@ -25,16 +29,6 @@ public class SyncroHour_Slave {
       } else {
          nameSlave = name;
       }
-   }
-
-   //écart
-   private double calculGap(double timeMaster, double timeSlave) {
-      return (timeMaster - timeSlave);
-   }
-
-   //délai
-   private double calculDelay(double timeMaster, double timeSlave) {
-      return ((timeMaster - timeSlave) / 2);
    }
 
    /**
@@ -46,6 +40,7 @@ public class SyncroHour_Slave {
          threadCommunication.start();*/
       multicastManager mm = new multicastManager(2223, "multicast1", "239.10.10.1");
       mm.run();
+      
       //Thread threadMulticastComm = new Thread(new multicastManager(2223, "multicast1", "239.10.10.1"));
       //threadMulticastComm.start();
       /*} catch (SocketException ex) {
