@@ -93,9 +93,8 @@ public class multicastManager implements Runnable {
 
             //System.out.println("Diffusion client: Message recu: " + messageRecieved);
             socket.leaveGroup(groupe);
-            socket.close(); //A VOIR SI ON LE SORT D'ICI
-
          }
+         socket.close();
       } catch (IOException ex) {
          Logger.getLogger(multicastManager.class.getName()).log(Level.SEVERE, null, ex);
       }
