@@ -84,8 +84,10 @@ public class multicastManager implements Runnable {
             if (packet.getData()[0] == SYNC) {
                timeReceivedSync = System.currentTimeMillis();
                id = packet.getData()[1];
+               System.out.println("SYNC id: " + id);
             }
             else if (packet.getData()[0] == FOLLOW_UP && packet.getData()[1] == id) {
+               System.out.println("FollowUp id: " + id);
                byte[] values = new byte[8];
                for(int i = 2; i < 10; i++){
                   values[i] = packet.getData()[i];
@@ -96,6 +98,7 @@ public class multicastManager implements Runnable {
                timeSendedSync = buf.getLong();
                //calcul of the gap
                gap = timeSendedSync - timeReceivedSync;
+               System.out.println("gap: " + gap);
                isDoneOnce = true;
             }
             //String messageRecieved = new String(packet.getData());

@@ -98,12 +98,13 @@ public class MessageManager implements Runnable {
 
             timeSendedRequest = System.currentTimeMillis();
             socket.send(packet);//send DELAY_REQUEST
-
+            System.out.println("Delay_Request sent id: " + id);
             buffer = new byte[256];
             packet = new DatagramPacket(buffer, buffer.length);
             socket.receive(packet);
             //verification that we received DELAY_RESPONSE => name = 0x04
             if (packet.getData()[0] == DELAY_RESPONSE && packet.getData()[1] == id) {
+               System.out.println("Delay_response id: " + id);
                //dateReceiveRequest = packet.getData()[2];
                byte[] values = new byte[8];
                for (int i = 2; i < 10; i++) {
@@ -115,6 +116,7 @@ public class MessageManager implements Runnable {
                timeReceivedRequest = buf.getLong();
                //calcul of the delay
                delayMilliSec = (timeReceivedRequest - timeSendedRequest) / 2;
+               System.out.println("delayMilliSec: " + delayMilliSec);
             }
 
             TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
