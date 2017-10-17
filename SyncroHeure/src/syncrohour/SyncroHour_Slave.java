@@ -47,14 +47,15 @@ public class SyncroHour_Slave {
       int min = 4;
       int max = 60;
       int k = 2;
-      
+
       multicastManager multiM = new multicastManager(2223, "multicast1", "239.10.10.1");
 
       multiM.run();
 
       while (!multiM.getIsDoneOnce());
+
       try {
-         Thread.sleep((min + (int)(Math.random() * ((max - min) + 1))));
+         Thread.sleep((min + (int) (Math.random() * ((max - min) + 1))));
       } catch (InterruptedException ex) {
          Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
       }
@@ -62,11 +63,14 @@ public class SyncroHour_Slave {
       MessageManager msgM;
 
       try {
-         msgM = new MessageManager(2222, "nadir-PC",min, max, k);
+         msgM = new MessageManager(2222, "NADIR-PC", min, max, k);
          msgM.run();
-         long shift = multiM.getGap() + msgM.getDelay();
-         timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
-         System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
+         while (true) {
+            long shift = multiM.getGap() + msgM.getDelay();
+            timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
+            System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
+         }
+
       } catch (SocketException ex) {
          Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
       }

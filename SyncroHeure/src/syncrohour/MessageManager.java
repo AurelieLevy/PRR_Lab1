@@ -8,6 +8,7 @@ package syncrohour;
 import java.net.*;
 import java.io.*;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -81,41 +82,43 @@ public class MessageManager implements Runnable {
       //date de l'envoi de la requête. Il s'agit du nb de ms depuis 01.01.1970
       long dateSendRequest;
       long dateReceiveRequest;
-
+      InetAddress address;
+      DatagramPacket packet;
+      byte[] buffer;
+      
       while (running) {
          try {
-            try {
-               //String message = "Hello from slave";
-               //byte[] buffer = message.getBytes();
-               id++;
-               byte[] buffer = new byte[]{DELAY_REQUEST, id};
+            //String message = "Hello from slave";
+            //byte[] buffer = message.getBytes();
+            id++;
+            buffer = new byte[]{DELAY_REQUEST, id};
+            address = InetAddress.getByName(NAME_MASTER);
+            packet = new DatagramPacket(buffer, buffer.length, address, PORT);
 
-               InetAddress address = InetAddress.getByName(NAME_MASTER);
-               DatagramPacket packet = new DatagramPacket(buffer, buffer.length, address, PORT);
-               dateSendRequest = System.currentTimeMillis();
-               socket.send(packet);//send DELAY_REQUEST
+            dateSendRequest = System.currentTimeMillis();
+            socket.send(packet);//send DELAY_REQUEST
 
-               buffer = new byte[256];
-               packet = new DatagramPacket(buffer, buffer.length);
-               socket.receive(packet);
-               //verification that we received DELAY_RESPONSE => name = 0x04
-               if (packet.getData()[0] == DELAY_RESPONSE && packet.getData()[1] == id) {
-                  dateReceiveRequest = packet.getData()[2];
-                  //calcul of the delay
-                  delayMilliSec = (dateReceiveRequest - dateSendRequest) / 2;
-               }
-               //String messageRecieved = new String(packet.getData());
-            } catch (UnknownHostException ex) {
-               Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
-
-            } catch (IOException ex) {
-               Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
+            buffer = new byte[256];
+            packet = new DatagramPacket(buffer, buffer.length);
+            socket.receive(packet);
+            //verification that we received DELAY_RESPONSE => name = 0x04
+            if (packet.getData()[0] == DELAY_RESPONSE && packet.getData()[1] == id) {
+               dateReceiveRequest = packet.getData()[2];
+               //calcul of the delay
+               delayMilliSec = (dateReceiveRequest - dateSendRequest) / 2;
             }
-            Thread.sleep((min + (int) (Math.random() * ((max - min) + 1))));
-         } catch (InterruptedException ex) {
+
+            TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
+            //String messageRecieved = new String(packet.getData());
+         } catch (UnknownHostException ex) {
             Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
 
+         } catch (IOException ex) {
+            Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
+         } catch (InterruptedException ex) {
+            Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
          }
+
       }
       socket.close();
    }
