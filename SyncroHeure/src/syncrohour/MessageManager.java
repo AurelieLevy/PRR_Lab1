@@ -108,7 +108,7 @@ public class MessageManager implements Runnable {
                //dateReceiveRequest = packet.getData()[2];
                byte[] values = new byte[8];
                for (int i = 2; i < 10; i++) {
-                  values[i] = packet.getData()[i];
+                  values[i - 2] = packet.getData()[i];
                }
                ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
                buf.put(values, 0, values.length);
