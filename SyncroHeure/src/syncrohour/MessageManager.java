@@ -7,6 +7,7 @@ package syncrohour;
 
 import java.net.*;
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
@@ -80,12 +81,12 @@ public class MessageManager implements Runnable {
               DELAY_RESPONSE = 0x04;
 
       //date de l'envoi de la requête. Il s'agit du nb de ms depuis 01.01.1970
-      long dateSendRequest;
-      long dateReceiveRequest;
+      long timeSendedRequest;
+      long timeReceivedRequest;
       InetAddress address;
       DatagramPacket packet;
       byte[] buffer;
-      
+
       while (running) {
          try {
             //String message = "Hello from slave";
@@ -95,7 +96,7 @@ public class MessageManager implements Runnable {
             address = InetAddress.getByName(NAME_MASTER);
             packet = new DatagramPacket(buffer, buffer.length, address, PORT);
 
-            dateSendRequest = System.currentTimeMillis();
+            timeSendedRequest = System.currentTimeMillis();
             socket.send(packet);//send DELAY_REQUEST
 
             buffer = new byte[256];
@@ -103,9 +104,17 @@ public class MessageManager implements Runnable {
             socket.receive(packet);
             //verification that we received DELAY_RESPONSE => name = 0x04
             if (packet.getData()[0] == DELAY_RESPONSE && packet.getData()[1] == id) {
-               dateReceiveRequest = packet.getData()[2];
+               //dateReceiveRequest = packet.getData()[2];
+               byte[] values = new byte[8];
+               for (int i = 2; i < 10; i++) {
+                  values[i] = packet.getData()[i];
+               }
+               ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
+               buf.put(values, 0, values.length);
+               buf.flip();
+               timeReceivedRequest = buf.getLong();
                //calcul of the delay
-               delayMilliSec = (dateReceiveRequest - dateSendRequest) / 2;
+               delayMilliSec = (timeReceivedRequest - timeSendedRequest) / 2;
             }
 
             TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
