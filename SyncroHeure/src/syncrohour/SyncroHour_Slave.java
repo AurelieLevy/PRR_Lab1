@@ -5,12 +5,6 @@
  */
 package syncrohour;
 
-import java.net.SocketException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -19,8 +13,6 @@ import java.util.logging.Logger;
 public class SyncroHour_Slave {
 
    private final String nameSlave;
-   private static long timeSlaveMilliSec;
-   private static boolean calculation;
 
    //private int countUnknown = 1;
    /*private byte[] slaveTime;
@@ -33,17 +25,10 @@ public class SyncroHour_Slave {
          throw new Error("invalid Parameter");
       } else {
          nameSlave = name;
-         calculation = true;
       }
    }
 
-   public long getTimeSlaveMilliSec() {
-      return timeSlaveMilliSec;
-   }
    
-   public void setCalculation(boolean b){
-      calculation = b;
-   }
 
    /**
     * @param args the command line arguments
@@ -55,21 +40,21 @@ public class SyncroHour_Slave {
       int min = 4*k;
       int max = 60*k;
 
-      multicastManager multiM = new multicastManager(2223, "multicast1", "239.10.10.1");
+      multicastManager multiM = new multicastManager(2223, "multicast1", "239.10.10.1", min, max);
       Thread threadMulticast = new Thread(multiM);
 
       //multiM.run();
       threadMulticast.start();
 
-      while (!multiM.getIsDoneOnce());
+      //while (!multiM.getIsDoneOnce());
 
-      try {
+      /*try {
          TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
       } catch (InterruptedException ex) {
          Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
-      }
+      }*/
 
-      MessageManager msgM;
+      /*MessageManager msgM;
       long shift;
       try {
          msgM = new MessageManager(2222, "NADIR-PC", min, max);
@@ -81,13 +66,8 @@ public class SyncroHour_Slave {
          }
       } catch (SocketException ex) {
          Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
-      }
-
-      //try {
-      // msgM.run();
-      /*} catch (SocketException ex) {
-         Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
       }*/
+      
    }
 
 }
