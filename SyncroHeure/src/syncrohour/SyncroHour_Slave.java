@@ -20,12 +20,12 @@ public class SyncroHour_Slave {
 
    private final String nameSlave;
    private static long timeSlaveMilliSec;
+
    //private int countUnknown = 1;
    /*private byte[] slaveTime;
    private byte[] slaveDifference;
    private byte[] slaveDelay;
    private Date systHour;*/
-
    public SyncroHour_Slave(String name) {
       if (name == null || name == "") {
          System.err.println("slave's name missing");
@@ -34,8 +34,8 @@ public class SyncroHour_Slave {
          nameSlave = name;
       }
    }
-   
-   public long getTimeSlaveMilliSec(){
+
+   public long getTimeSlaveMilliSec() {
       return timeSlaveMilliSec;
    }
 
@@ -43,15 +43,26 @@ public class SyncroHour_Slave {
     * @param args the command line arguments
     */
    public static void main(String[] args) {
-
-      multicastManager multiM = new multicastManager(2223, "multicast1", "239.10.10.1");
-      multiM.run();
+      //value for the waiting time
+      int min = 4;
+      int max = 60;
+      int k = 2;
       
-      while(!multiM.getIsDoneOnce());
+      multicastManager multiM = new multicastManager(2223, "multicast1", "239.10.10.1");
+
+      multiM.run();
+
+      while (!multiM.getIsDoneOnce());
+      try {
+         Thread.sleep((min + (int)(Math.random() * ((max - min) + 1))));
+      } catch (InterruptedException ex) {
+         Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
+      }
 
       MessageManager msgM;
+
       try {
-         msgM = new MessageManager(2222, "nadir-PC");
+         msgM = new MessageManager(2222, "nadir-PC",min, max, k);
          msgM.run();
          long shift = multiM.getGap() + msgM.getDelay();
          timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
