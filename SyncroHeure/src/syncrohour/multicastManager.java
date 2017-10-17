@@ -19,21 +19,32 @@ public class multicastManager implements Runnable {
    private final int PORT;
    private final String NAME_MASTER;
    private final String ADDRESS_GROUP;
-   private Date timeMaster;
-   private Date timeSlave;
-
+   /*private Date timeMaster;
+   private Date timeSlave;*/
+   private long gap;
+   private boolean isDoneOnce;
    private final boolean running;
 
    public multicastManager(int port, String name, String addGrp) {
       this.PORT = port;
       this.NAME_MASTER = name;
       this.ADDRESS_GROUP = addGrp;
-      running = true;
+      this.running = true;
+      this.gap = 0;
+      isDoneOnce = false;
+   }
+   
+   public boolean getIsDoneOnce(){
+      return isDoneOnce;
+   }
+   
+   public long getGap(){
+      return gap;
    }
 
-   public void setTimeMaster(Date newTime) {
+   /*public void setTimeMaster(Date newTime) {
       timeMaster = newTime;
-   }
+   }*/
 
    public String getAddressGroupe() {
       return ADDRESS_GROUP;
@@ -43,17 +54,23 @@ public class multicastManager implements Runnable {
       return PORT;
    }
 
-   public Date getTimeMaster() {
+   /*public Date getTimeMaster() {
       return timeMaster;
-   }
-
-   //écart
-   private double calculGap(double timeMaster, double timeSlave) {
-      return (timeMaster - timeSlave);
-   }
-
+   }*/
+   
+   /**
+    * Permet de gérer la reception des SYNC et FOLLOW_UP 
+    * Format: 
+    * SYNC: tableau de byte [nomMsg, id] 
+    * FOLLOW_UP: tableau de byte [nomMsg, id, h]
+    */
    @Override
    public void run() {
+      byte SYNC = 0x01,
+              FOLLOW_UP = 0x02;
+      long dateReceiveSync = 0;
+      long dateSendSync = 0;
+      byte id = 0;
       while (running) {
          byte[] buffer = new byte[256];
          try {
@@ -62,10 +79,20 @@ public class multicastManager implements Runnable {
             socket.joinGroup(groupe);
 
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);
-            String messageRecieved = new String(packet.getData());
+            socket.receive(packet); 
+            //verification of the message
+            if(packet.getData()[0] == SYNC){
+               dateReceiveSync = System.currentTimeMillis();
+               id = packet.getData()[1];
+            }
+            if(packet.getData()[0] == FOLLOW_UP && packet.getData()[1] == id){
+               //calcul of the gap
+               gap = dateSendSync - dateReceiveSync;
+               isDoneOnce = true;
+            }
+            //String messageRecieved = new String(packet.getData());
 
-            System.out.println("Diffusion client: Message recu: " + messageRecieved);
+            //System.out.println("Diffusion client: Message recu: " + messageRecieved);
 
             socket.leaveGroup(groupe);
             socket.close(); //A VOIR SI ON LE SORT D'ICI

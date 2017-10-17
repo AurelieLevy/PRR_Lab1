@@ -5,9 +5,12 @@
  */
 package syncrohour;
 
+import java.net.SocketException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
-
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -15,12 +18,13 @@ import java.util.Timer;
  */
 public class SyncroHour_Slave {
 
-   final String nameSlave;
-   private int countUnknown = 1;
-   private byte[] slaveTime;
+   private final String nameSlave;
+   private static long timeSlaveMilliSec;
+   //private int countUnknown = 1;
+   /*private byte[] slaveTime;
    private byte[] slaveDifference;
    private byte[] slaveDelay;
-   private Date systHour;
+   private Date systHour;*/
 
    public SyncroHour_Slave(String name) {
       if (name == null || name == "") {
@@ -30,22 +34,32 @@ public class SyncroHour_Slave {
          nameSlave = name;
       }
    }
+   
+   public long getTimeSlaveMilliSec(){
+      return timeSlaveMilliSec;
+   }
 
    /**
     * @param args the command line arguments
     */
    public static void main(String[] args) {
-      /*try {
-         Thread threadCommunication = new Thread(new MessageManager(2222, "NADIR-PC"));
-         threadCommunication.start();*/
-      multicastManager mm = new multicastManager(2223, "multicast1", "239.10.10.1");
-      mm.run();
+
+      multicastManager multiM = new multicastManager(2223, "multicast1", "239.10.10.1");
+      multiM.run();
       
-      //Thread threadMulticastComm = new Thread(new multicastManager(2223, "multicast1", "239.10.10.1"));
-      //threadMulticastComm.start();
-      /*} catch (SocketException ex) {
-         System.err.println("Thread not created!");
-      }*/
+      while(!multiM.getIsDoneOnce());
+
+      MessageManager msgM;
+      try {
+         msgM = new MessageManager(2222, "nadir-PC");
+         msgM.run();
+         long shift = multiM.getGap() + msgM.getDelay();
+         timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
+         System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
+      } catch (SocketException ex) {
+         Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
+      }
+
    }
 
 }
