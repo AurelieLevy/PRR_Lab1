@@ -28,9 +28,8 @@ public class MessageManager implements Runnable {
    private long delayMilliSec;
    private int min;
    private int max;
-   private int k;
 
-   public MessageManager(int port, String name, int min, int max, int k) throws SocketException {
+   public MessageManager(int port, String name, int min, int max) throws SocketException {
       this.PORT = port;
       this.NAME_MASTER = name;
       socket = new DatagramSocket(port);
@@ -38,7 +37,6 @@ public class MessageManager implements Runnable {
       this.running = true;
       this.min = min;
       this.max = max;
-      this.k = k;
    }
 
    public long getDelay() {
@@ -81,8 +79,8 @@ public class MessageManager implements Runnable {
               DELAY_RESPONSE = 0x04;
 
       //date de l'envoi de la requête. Il s'agit du nb de ms depuis 01.01.1970
-      long timeSendedRequest;
-      long timeReceivedRequest;
+      long timeSendedRequestForSlave;
+      long timeReceivedRequestForMaster;
       InetAddress address;
       DatagramPacket packet;
       byte[] buffer;
@@ -96,7 +94,7 @@ public class MessageManager implements Runnable {
             address = InetAddress.getByName(NAME_MASTER);
             packet = new DatagramPacket(buffer, buffer.length, address, PORT);
 
-            timeSendedRequest = System.currentTimeMillis();
+            timeSendedRequestForSlave = System.currentTimeMillis();
             socket.send(packet);//send DELAY_REQUEST
             System.out.println("Delay_Request sent id: " + id);
             buffer = new byte[256];
@@ -113,9 +111,9 @@ public class MessageManager implements Runnable {
                ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
                buf.put(values, 0, values.length);
                buf.flip();
-               timeReceivedRequest = buf.getLong();
+               timeReceivedRequestForMaster = buf.getLong();
                //calcul of the delay
-               delayMilliSec = (timeReceivedRequest - timeSendedRequest) / 2;
+               delayMilliSec = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
                System.out.println("delayMilliSec: " + delayMilliSec);
             }
 

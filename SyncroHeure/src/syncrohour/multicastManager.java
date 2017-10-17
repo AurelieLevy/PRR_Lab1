@@ -65,8 +65,8 @@ public class multicastManager implements Runnable {
    public void run() {
       byte SYNC = 0x01,
               FOLLOW_UP = 0x02;
-      long timeReceivedSync = 0;
-      long timeSendedSync = 0;
+      long timeReceivedForSlave = 0;
+      long timeSendedForMaster = 0;
       byte id = 0;
 
       MulticastSocket socket;
@@ -82,7 +82,7 @@ public class multicastManager implements Runnable {
             socket.receive(packet);
             //verification of the message
             if (packet.getData()[0] == SYNC) {
-               timeReceivedSync = System.currentTimeMillis();
+               timeReceivedForSlave = System.currentTimeMillis();
                id = packet.getData()[1];
                System.out.println("SYNC id: " + id);
             }
@@ -95,9 +95,9 @@ public class multicastManager implements Runnable {
                ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
                buf.put(values, 0, values.length);
                buf.flip();
-               timeSendedSync = buf.getLong();
+               timeSendedForMaster = buf.getLong();
                //calcul of the gap
-               gap = timeSendedSync - timeReceivedSync;
+               gap = timeSendedForMaster - timeReceivedForSlave;
                System.out.println("gap: " + gap);
                isDoneOnce = true;
             }

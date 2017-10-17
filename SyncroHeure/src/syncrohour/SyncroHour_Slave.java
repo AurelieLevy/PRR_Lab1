@@ -50,9 +50,10 @@ public class SyncroHour_Slave {
     */
    public static void main(String[] args) {
       //value for the waiting time
-      int min = 4;
-      int max = 60;
+      
       int k = 2;
+      int min = 4*k;
+      int max = 60*k;
 
       multicastManager multiM = new multicastManager(2223, "multicast1", "239.10.10.1");
       Thread threadMulticast = new Thread(multiM);
@@ -69,11 +70,12 @@ public class SyncroHour_Slave {
       }
 
       MessageManager msgM;
+      long shift;
       try {
-         msgM = new MessageManager(2222, "NADIR-PC", min, max, k);
+         msgM = new MessageManager(2222, "NADIR-PC", min, max);
          Thread threadPtToPt = new Thread(msgM);
          while (calculation) {
-            long shift = multiM.getGap() + msgM.getDelay();
+            shift = multiM.getGap() + msgM.getDelay();
             timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
             System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
          }
