@@ -114,7 +114,8 @@ public class multicastManager implements Runnable {
             }
 
             if (!isDoneOnce) {
-               MessageManager msgM = new MessageManager(2222, "NADIR-PC", min, max);
+               //MessageManager msgM = new MessageManager(2222, "NADIR-PC", min, max);
+               MessageManager msgM = new MessageManager(2225, "MSI", min, max);
                Thread threadPtToPT = new Thread(msgM);
                isDoneOnce = true;
                try {
