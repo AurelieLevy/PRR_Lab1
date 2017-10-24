@@ -60,10 +60,10 @@ public class SyncroHour_Slave {
       }
 */
 
-      MessageManager msgM;
+      /*MessageManager msgM;
       long shift;
       boolean calculation = true;
-      long timeSlaveMilliSec;
+      long timeSlaveMilliSec;*/
       
       /*
         while (calculation) {
