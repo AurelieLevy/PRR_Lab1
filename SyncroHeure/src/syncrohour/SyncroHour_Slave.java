@@ -52,29 +52,26 @@ public class SyncroHour_Slave {
 
       threadMulticast.start();
 
+      /*
       try {
          TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
       } catch (InterruptedException ex) {
          Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
       }
+*/
 
       MessageManager msgM;
       long shift;
       boolean calculation = true;
       long timeSlaveMilliSec;
-      try {
-         msgM = new MessageManager(2220, "NADIR-PC", min, max);
-         Thread threadPtToPt = new Thread(msgM);
-         threadPtToPt.start();
-         while (calculation) {
-            shift = multiM.getGap() + msgM.getDelay();
-            timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
-            System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
-         }
-      } catch (SocketException ex) {
-         Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
-      }
       
+      /*
+        while (calculation) {
+           shift = multiM.getGap() + msgM.getDelay();
+           timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
+           System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
+        }
+      */
    }
 
 }

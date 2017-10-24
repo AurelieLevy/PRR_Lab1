@@ -96,6 +96,7 @@ public class multicastManager implements Runnable {
             if (packet.getData()[0] == SYNC) {
                timeReceivedForSlave = System.currentTimeMillis();
                id = packet.getData()[1];
+               isDoneOnce = true;
                System.out.println("SYNC id: " + id);
             } else if (packet.getData()[0] == FOLLOW_UP && packet.getData()[1] == id) {
                System.out.println("FollowUp id: " + id);
@@ -113,16 +114,17 @@ public class multicastManager implements Runnable {
                //isDoneOnce = true;
             }
 
-            if (!isDoneOnce) {
+            if (isDoneOnce) {
                //MessageManager msgM = new MessageManager(2222, "NADIR-PC", min, max);
                MessageManager msgM = new MessageManager(2225, "MSI", min, max);
                Thread threadPtToPT = new Thread(msgM);
-               isDoneOnce = true;
+               /*
                try {
                   TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
                } catch (InterruptedException ex) {
                   Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
                }
+               */
                threadPtToPT.start();
                long shift = this.getGap() + msgM.getDelay();
                timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
@@ -145,6 +147,7 @@ public class multicastManager implements Runnable {
             //String messageRecieved = new String(packet.getData());
             //System.out.println("Diffusion client: Message recu: " + messageRecieved);
          }
+         
          socket.leaveGroup(groupe);
          socket.close();
       } catch (IOException ex) {
