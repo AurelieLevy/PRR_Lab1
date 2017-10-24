@@ -84,6 +84,7 @@ public class multicastManager implements Runnable {
 
       MulticastSocket socket;
       InetAddress groupe;
+      MessageManager msgM = null;
       try {
          socket = new MulticastSocket(this.PORT);
          groupe = InetAddress.getByName(ADDRESS_GROUP);
@@ -115,10 +116,10 @@ public class multicastManager implements Runnable {
             }
 
             if (isDoneOnce) {
-               MessageManager msgM = null;
                //MessageManager msgM = new MessageManager(2222, "NADIR-PC", min, max);
                if (!initiate) {
-                  msgM = new MessageManager(2225, "MSI", min, max);
+                  msgM = new MessageManager(2222, "NADIR-PC", min, max);
+                  //msgM = new MessageManager(2225, "MSI", min, max);
                   Thread threadPtToPT = new Thread(msgM);
                   threadPtToPT.start();
                   initiate = true;
