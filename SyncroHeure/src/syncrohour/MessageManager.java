@@ -25,7 +25,7 @@ public class MessageManager implements Runnable {
    /*private Date timeMaster;
    private Date timeSlave;*/
    private final boolean running;
-   private long delayMilliSec;
+   private long delayMilliSec = 0;
    private int min;
    private int max;
 
@@ -113,8 +113,11 @@ public class MessageManager implements Runnable {
                buf.flip();
                timeReceivedRequestForMaster = buf.getLong();
                //calcul of the delay
-               delayMilliSec = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
-               System.out.println("delayMilliSec: " + delayMilliSec);
+               synchronized(this)  {
+                  delayMilliSec = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
+                  System.out.println("delayMilliSec: " + delayMilliSec);
+               }
+
             }
 
             TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
