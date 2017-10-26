@@ -9,12 +9,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.net.SocketException;
-import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Timer;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -90,26 +86,35 @@ public class multicastManager implements Runnable {
          groupe = InetAddress.getByName(ADDRESS_GROUP);
          socket.joinGroup(groupe);
 
+         byte[] buffer;
+         DatagramPacket packet;
          while (running) {
-            byte[] buffer = new byte[256];
-            DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
+            buffer = new byte[10];
+            packet = new DatagramPacket(buffer, buffer.length);
             socket.receive(packet);
+            buffer = packet.getData();
             //verification of the message
-            if (packet.getData()[0] == SYNC) {
+            if (buffer[0] == SYNC) {
                timeReceivedForSlave = System.currentTimeMillis();
-               id = packet.getData()[1];
+               id = buffer[1];
                System.out.println("SYNC id: " + id);
-            } else if (packet.getData()[0] == FOLLOW_UP && packet.getData()[1] == id) {
+            } 
+            else if (buffer[0] == FOLLOW_UP && buffer[1] == id) {
                System.out.println("FollowUp id: " + id);
-               byte[] values = new byte[8];
-               for (int i = 2; i < 10; i++) {
+
+               //buffer = new byte[10];
+               //buffer = packet.getData();
+
+               /*for (int i = 2; i < 10; i++) {
                   values[i - 2] = packet.getData()[i];
-               }
-               ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
+               }*/
+               timeSendedForMaster = utils.getTimeByByteTab(buffer);
+               /*ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
                buf.put(values, 0, values.length);
                buf.flip();
-               timeSendedForMaster = buf.getLong();
-               //calcul of the gap
+               timeSendedForMaster = buf.getLong();*/
+
+               //calcul of the gap (ecart)
                gap = timeSendedForMaster - timeReceivedForSlave;
                System.out.println("gap: " + gap);
                isDoneOnce = true;
@@ -118,7 +123,7 @@ public class multicastManager implements Runnable {
             if (isDoneOnce) {
                //MessageManager msgM = new MessageManager(2222, "NADIR-PC", min, max);
                if (!initiate) {
-                  msgM = new MessageManager(2222, "NADIR-PC", min, max);
+                  msgM = new MessageManager(2222, "MSI", min, max);
                   //msgM = new MessageManager(2225, "MSI", min, max);
                   Thread threadPtToPT = new Thread(msgM);
                   threadPtToPT.start();
@@ -132,11 +137,12 @@ public class multicastManager implements Runnable {
                   Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
                }
                 */
-               synchronized (this) {
-                  long shift = this.getGap() + msgM.getDelay();
-                  timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
-                  System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
-               }
+               //synchronized (this) {
+               long shift = this.getGap() + msgM.getDelay();
+               timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
+               System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
+               timeReceivedForSlave = 0;
+//}
 
                /*MessageManager msgM;
                long shift;

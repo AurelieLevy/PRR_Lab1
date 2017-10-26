@@ -32,7 +32,7 @@ public class MessageManager implements Runnable {
    public MessageManager(int port, String name, int min, int max) throws SocketException {
       this.PORT = port;
       this.NAME_MASTER = name;
-      socket = new DatagramSocket(port);
+      socket = new DatagramSocket();
       //timeMaster = new Date();
       this.running = true;
       this.min = min;
@@ -113,14 +113,14 @@ public class MessageManager implements Runnable {
                buf.flip();
                timeReceivedRequestForMaster = buf.getLong();
                //calcul of the delay
-               synchronized(this)  {
+               //synchronized(this)  {
                   delayMilliSec = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
                   System.out.println("delayMilliSec: " + delayMilliSec);
-               }
+               //}
 
             }
 
-            TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
+TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
             //String messageRecieved = new String(packet.getData());
          } catch (UnknownHostException ex) {
             Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
