@@ -10,9 +10,9 @@ package syncrohour;
  *
  * @author aurel
  */
-public class utils {
+public class Utils {
 
-   static long getTimeByByteTab(byte[] values) {
+   static long getTimeLong(byte[] values) {
       long time = 0;
       for (int i = 9; i >= 2; i--) {
          time <<= 8;

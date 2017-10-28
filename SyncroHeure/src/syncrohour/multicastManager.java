@@ -19,8 +19,6 @@ public class multicastManager implements Runnable {
    private final int PORT;
    private final String NAME_MASTER;
    private final String ADDRESS_GROUP;
-   /*private Date timeMaster;
-   private Date timeSlave;*/
    private long gap;
    private boolean isDoneOnce;
    private boolean initiate = false;
@@ -52,9 +50,6 @@ public class multicastManager implements Runnable {
       return gap;
    }
 
-   /*public void setTimeMaster(Date newTime) {
-      timeMaster = newTime;
-   }*/
    public String getAddressGroupe() {
       return ADDRESS_GROUP;
    }
@@ -63,9 +58,6 @@ public class multicastManager implements Runnable {
       return PORT;
    }
 
-   /*public Date getTimeMaster() {
-      return timeMaster;
-   }*/
    /**
     * Permet de gérer la reception des SYNC et FOLLOW_UP Format: SYNC: tableau
     * de byte [nomMsg, id] FOLLOW_UP: tableau de byte [nomMsg, id, h]
@@ -88,6 +80,7 @@ public class multicastManager implements Runnable {
 
          byte[] buffer;
          DatagramPacket packet;
+         
          while (running) {
             buffer = new byte[10];
             packet = new DatagramPacket(buffer, buffer.length);
@@ -96,26 +89,19 @@ public class multicastManager implements Runnable {
             //verification of the message
             if (buffer[0] == SYNC) {
                timeReceivedForSlave = System.currentTimeMillis();
+      System.out.println("timeReceivedForSlave " + timeReceivedForSlave);
                id = buffer[1];
-               System.out.println("SYNC id: " + id);
+      System.out.println("SYNC id: " + id);
             } 
             else if (buffer[0] == FOLLOW_UP && buffer[1] == id) {
-               System.out.println("FollowUp id: " + id);
+               //System.out.println("FollowUp id: " + id);
 
-               //buffer = new byte[10];
-               //buffer = packet.getData();
-
-               /*for (int i = 2; i < 10; i++) {
-                  values[i - 2] = packet.getData()[i];
-               }*/
-               timeSendedForMaster = utils.getTimeByByteTab(buffer);
-               /*ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
-               buf.put(values, 0, values.length);
-               buf.flip();
-               timeSendedForMaster = buf.getLong();*/
-
+               timeSendedForMaster = Utils.getTimeLong(buffer);
+               
                //calcul of the gap (ecart)
                gap = timeSendedForMaster - timeReceivedForSlave;
+      System.out.println("timeReceivedForSlave bis " + timeReceivedForSlave);
+               System.out.println("timeSendedForMaster " + timeSendedForMaster);
                System.out.println("gap: " + gap);
                isDoneOnce = true;
             }
@@ -130,37 +116,12 @@ public class multicastManager implements Runnable {
                   initiate = true;
                }
 
-               /*
-               try {
-                  TimeUnit.SECONDS.sleep((min + (int) (Math.random() * ((max - min) + 1))));
-               } catch (InterruptedException ex) {
-                  Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
-               }
-                */
-               //synchronized (this) {
                long shift = this.getGap() + msgM.getDelay();
                timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
-               System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
-               timeReceivedForSlave = 0;
-//}
-
-               /*MessageManager msgM;
-               long shift;
-               try {
-                  msgM = new MessageManager(2222, "NADIR-PC", min, max);
-                  Thread threadPtToPt = new Thread(msgM);
-                  while (calculation) {
-                     shift = multiM.getGap() + msgM.getDelay();
-                     timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
-                     System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
-                  }
-               } catch (SocketException ex) {
-                  Logger.getLogger(SyncroHour_Slave.class.getName()).log(Level.SEVERE, null, ex);
-               }*/
+               System.out.println("timeSlaveMilliSec: " + timeSlaveMilliSec);
+              System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
             }
 
-            //String messageRecieved = new String(packet.getData());
-            //System.out.println("Diffusion client: Message recu: " + messageRecieved);
          }
 
          socket.leaveGroup(groupe);

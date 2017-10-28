@@ -22,8 +22,6 @@ public class MessageManager implements Runnable {
    private final int PORT;
    private final String NAME_MASTER;
    private DatagramSocket socket;
-   /*private Date timeMaster;
-   private Date timeSlave;*/
    private final boolean running;
    private long delayMilliSec = 0;
    private int min;
@@ -33,7 +31,6 @@ public class MessageManager implements Runnable {
       this.PORT = port;
       this.NAME_MASTER = name;
       socket = new DatagramSocket();
-      //timeMaster = new Date();
       this.running = true;
       this.min = min;
       this.max = max;
@@ -42,15 +39,7 @@ public class MessageManager implements Runnable {
    public long getDelay() {
       return delayMilliSec;
    }
-
-   /*private String getTimeString(){
-      Long m = System.currentTimeMillis();
-      Date d = new Date(m);
-      return new SimpleDateFormat("hh:mm:ss").parse(d);
-   }*/
- /*public void setTimeMaster(Date newTime) {
-      timeMaster = newTime;
-   }*/
+   
    public int getPORT() {
       return PORT;
    }
@@ -59,14 +48,6 @@ public class MessageManager implements Runnable {
       return NAME_MASTER;
    }
 
-   /* public Date getTimeMaster() {
-      return timeMaster;
-   }*/
-   //delay
-   //voir https://www.developpez.net/forums/d510150/java/general-java/apis/java-util/difference-entre-heures/
-   /*private double calculDelay(Date timeMaster, Date timeSlave) {
-      return (((timeMaster.getTime() - timeSlave.getTime()) / 1000) / 2);
-   }*/
    /**
     * Permet de gérer l'envoi/reception des delay_XXXX Format: delay_request:
     * tableau de byte [nomMsg, id] delay_response: tableau de byte [nomMsg, id,
@@ -78,7 +59,7 @@ public class MessageManager implements Runnable {
       byte DELAY_REQUEST = 0x03,
               DELAY_RESPONSE = 0x04;
 
-      //date de l'envoi de la requête. Il s'agit du nb de ms depuis 01.01.1970
+      
       long timeSendedRequestForSlave;
       long timeReceivedRequestForMaster;
       InetAddress address;
@@ -87,8 +68,6 @@ public class MessageManager implements Runnable {
 
       while (running) {
          try {
-            //String message = "Hello from slave";
-            //byte[] buffer = message.getBytes();
             id++;
             buffer = new byte[]{DELAY_REQUEST, id};
             address = InetAddress.getByName(NAME_MASTER);
@@ -97,26 +76,19 @@ public class MessageManager implements Runnable {
             timeSendedRequestForSlave = System.currentTimeMillis();
             socket.send(packet);//send DELAY_REQUEST
             System.out.println("Delay_Request sent id: " + id);
-            buffer = new byte[256];
+            
+            
+            buffer = new byte[10];
             packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);
+            socket.receive(packet);//recieve delayresponse
+            
             //verification that we received DELAY_RESPONSE => name = 0x04
             if (packet.getData()[0] == DELAY_RESPONSE && packet.getData()[1] == id) {
                System.out.println("Delay_response id: " + id);
-               //dateReceiveRequest = packet.getData()[2];
-               byte[] values = new byte[8];
-               for (int i = 2; i < 10; i++) {
-                  values[i - 2] = packet.getData()[i];
-               }
-               ByteBuffer buf = ByteBuffer.allocate(Long.BYTES);
-               buf.put(values, 0, values.length);
-               buf.flip();
-               timeReceivedRequestForMaster = buf.getLong();
+               timeReceivedRequestForMaster = Utils.getTimeLong(buffer);
                //calcul of the delay
-               //synchronized(this)  {
                   delayMilliSec = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
                   System.out.println("delayMilliSec: " + delayMilliSec);
-               //}
 
             }
 
