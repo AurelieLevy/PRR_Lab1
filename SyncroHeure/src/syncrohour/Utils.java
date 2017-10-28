@@ -6,11 +6,47 @@
  */
 package syncrohour;
 
+import java.net.SocketAddress;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author aurel
  */
 public class Utils {
+
+   static SocketAddress NAME_MASTER;
+   static final int MAX = 60;
+   static final int MIN = 4;
+   static final int K = 2;
+   static final String multicastAddress = "239.10.10.1";
+   
+   static String getMulticastAddress(){
+      return multicastAddress;
+   }
+
+   static void setNameMaster(SocketAddress name) {
+      NAME_MASTER = name;
+   }
+
+   static SocketAddress getNameMaster() {
+      return NAME_MASTER;
+   }
+
+   static int getMAX() {
+      return MAX;
+   }
+
+   static int getMIN() {
+      return MIN;
+   }
+
+   static int getK() {
+      return K;
+   }
 
    static long getTimeLong(byte[] values) {
       long time = 0;
@@ -19,6 +55,15 @@ public class Utils {
          time |= (values[i] & 0xFF);
       }
       return time;
+   }
+
+   static void waitRandomTime() {
+      Random r = new Random();
+      try {
+         TimeUnit.SECONDS.sleep((Utils.getMIN() * Utils.getK() + r.nextInt(Utils.MAX * Utils.getK() - Utils.getMIN() * Utils.getK())));
+      } catch (InterruptedException ex) {
+         Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+      }
    }
 
 }

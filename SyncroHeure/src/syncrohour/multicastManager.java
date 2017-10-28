@@ -17,25 +17,20 @@ import java.util.logging.Logger;
 public class multicastManager implements Runnable {
 
    private final int PORT;
-   private final String NAME_MASTER;
    private final String ADDRESS_GROUP;
    private long gap;
    private boolean isDoneOnce;
    private boolean initiate = false;
    private final boolean running;
-   private int max;
-   private int min;
+
    private static long timeSlaveMilliSec;
 
-   public multicastManager(int port, String name, String addGrp, int min, int max) {
-      this.PORT = port;
-      this.NAME_MASTER = name;
-      this.ADDRESS_GROUP = addGrp;
-      this.running = true;
-      this.gap = 0;
-      this.isDoneOnce = false;
-      this.max = max;
-      this.min = min;
+   public multicastManager(int port, String addGrp) {
+      PORT = port;
+      ADDRESS_GROUP = addGrp;
+      running = true;
+      gap = 0;
+      isDoneOnce = false;
    }
 
    public long getTimeSlaveMilliSec() {
@@ -74,13 +69,13 @@ public class multicastManager implements Runnable {
       InetAddress groupe;
       MessageManager msgM = null;
       try {
-         socket = new MulticastSocket(this.PORT);
+         socket = new MulticastSocket(PORT);
          groupe = InetAddress.getByName(ADDRESS_GROUP);
          socket.joinGroup(groupe);
 
          byte[] buffer;
          DatagramPacket packet;
-         
+
          while (running) {
             buffer = new byte[10];
             packet = new DatagramPacket(buffer, buffer.length);
@@ -89,19 +84,17 @@ public class multicastManager implements Runnable {
             //verification of the message
             if (buffer[0] == SYNC) {
                timeReceivedForSlave = System.currentTimeMillis();
-      System.out.println("timeReceivedForSlave " + timeReceivedForSlave);
+               //System.out.println("timeReceivedForSlave " + timeReceivedForSlave);
                id = buffer[1];
-      System.out.println("SYNC id: " + id);
-            } 
-            else if (buffer[0] == FOLLOW_UP && buffer[1] == id) {
+               //System.out.println("SYNC id: " + id);
+            } else if (buffer[0] == FOLLOW_UP && buffer[1] == id) {
                //System.out.println("FollowUp id: " + id);
 
                timeSendedForMaster = Utils.getTimeLong(buffer);
-               
+
                //calcul of the gap (ecart)
                gap = timeSendedForMaster - timeReceivedForSlave;
-      System.out.println("timeReceivedForSlave bis " + timeReceivedForSlave);
-               System.out.println("timeSendedForMaster " + timeSendedForMaster);
+               //System.out.println("timeSendedForMaster " + timeSendedForMaster);
                System.out.println("gap: " + gap);
                isDoneOnce = true;
             }
@@ -109,21 +102,20 @@ public class multicastManager implements Runnable {
             if (isDoneOnce) {
                //MessageManager msgM = new MessageManager(2222, "NADIR-PC", min, max);
                if (!initiate) {
-                  msgM = new MessageManager(2222, "MSI", min, max);
-                  //msgM = new MessageManager(2225, "MSI", min, max);
+                  msgM = new MessageManager(2222);
+                  Utils.setNameMaster(packet.getSocketAddress());
                   Thread threadPtToPT = new Thread(msgM);
+                  Utils.waitRandomTime();//attente pour la première fois
                   threadPtToPT.start();
                   initiate = true;
                }
 
-               long shift = this.getGap() + msgM.getDelay();
+               long shift = gap + msgM.getDelay();
                timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
-               System.out.println("timeSlaveMilliSec: " + timeSlaveMilliSec);
-              System.out.println(new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
+               //System.out.println("timeSlaveMilliSec: " + timeSlaveMilliSec);
+               System.out.println("heure de l'esclave: " + new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
             }
-
          }
-
          socket.leaveGroup(groupe);
          socket.close();
       } catch (IOException ex) {

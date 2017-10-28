@@ -5,38 +5,18 @@
  */
 package syncrohour;
 
-
-
 /**
  *
  * @author aurel
  */
 public class SyncroHour_Slave {
 
-   private final String nameSlave;
-
-   public SyncroHour_Slave(String name) {
-      if (name == null || name == "") {
-         System.err.println("slave's name missing");
-         throw new Error("invalid Parameter");
-      } else {
-         nameSlave = name;
-      }
-   }
-
-   
 
    /**
     * @param args the command line arguments
     */
    public static void main(String[] args) {
-      //value for the waiting time
-      
-      int k = 2;
-      int min = 4*k;
-      int max = 60*k;
-
-      multicastManager multiM = new multicastManager(2223, "multicast1", "239.10.10.1", min, max);
+       multicastManager multiM = new multicastManager(2223, Utils.getMulticastAddress());
       Thread threadMulticast = new Thread(multiM);
 
       threadMulticast.start();
