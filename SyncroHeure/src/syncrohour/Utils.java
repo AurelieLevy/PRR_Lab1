@@ -1,68 +1,77 @@
-
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Fichier: Utils.java
+ * Auteurs: Nadir Benallal, Aurelie Levy
+ * Creation: Octobre 2017
+ * But: Configuration de l'esclave
+ * ATTENTION: doit correspondre a celle du maitre!!!!
  */
 package syncrohour;
 
 import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author aurel
- */
 public class Utils {
 
    ///static SocketAddress NAME_MASTER;
-   static InetAddress ADRESS_MASTER;
-   static final int MAX = 60;
-   static final int MIN = 4;
-   static final int K = 2;
-   static final String multicastAddress = "239.10.10.1";
-   static final int PORT_MASTER = 2222;
-   
-   static int getPortMaster(){
+   private static InetAddress ADRESS_MASTER;
+   private static final int MAX = 60;
+   private static final int MIN = 4;
+   private static final int K = 2;
+   private static final String MULTICAST_ADRESS = "239.10.10.1";
+   private static final int PORT_MASTER = 2222;
+   private static final byte DELAY_REQUEST = 0x03,
+           DELAY_RESPONSE = 0x04,
+           SYNC = 0x01,
+           FOLLOW_UP = 0x02;
+
+   public static byte getSync() {
+      return SYNC;
+   }
+
+   public static byte getFollowUp() {
+      return FOLLOW_UP;
+   }
+
+   public static byte getDelayRequest() {
+      return DELAY_REQUEST;
+   }
+
+   public static byte getDelayResponse() {
+      return DELAY_RESPONSE;
+   }
+
+   public static int getPortMaster() {
       return PORT_MASTER;
    }
-   
-   static String getMulticastAddress(){
-      return multicastAddress;
+
+   public static String getMULTICAST_ADRESS() {
+      return MULTICAST_ADRESS;
    }
 
-   static void setAdressMaster(InetAddress adress){
+   public static void setAdressMaster(InetAddress adress) {
       ADRESS_MASTER = adress;
    }
-   
-   static InetAddress getAdressMaster(){
+
+   public static InetAddress getAdressMaster() {
       return ADRESS_MASTER;
    }
-   /*static void setNameMaster(SocketAddress name) {
-      NAME_MASTER = name;
-   }*/
 
-   /*static SocketAddress getNameMaster() {
-      return NAME_MASTER;
-   }*/
-
-   static int getMAX() {
+   public static int getMAX() {
       return MAX;
    }
 
-   static int getMIN() {
+   public static int getMIN() {
       return MIN;
    }
 
-   static int getK() {
+   public static int getK() {
       return K;
    }
 
-   static long getTimeLong(byte[] values) {
+   public static long getTimeLong(byte[] values) {
       long time = 0;
       for (int i = 9; i >= 2; i--) {
          time <<= 8;
@@ -71,12 +80,13 @@ public class Utils {
       return time;
    }
 
-   static void waitRandomTime() {
+   public static void waitRandomTime() {
       Random r = new Random();
       try {
          TimeUnit.SECONDS.sleep((Utils.getMIN() * Utils.getK() + r.nextInt(Utils.MAX * Utils.getK() - Utils.getMIN() * Utils.getK())));
       } catch (InterruptedException ex) {
          Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
+//TODO
       }
    }
 

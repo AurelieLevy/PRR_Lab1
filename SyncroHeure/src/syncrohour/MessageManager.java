@@ -1,42 +1,35 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Fichier: MessageManager.java
+ * Auteurs: Nadir Benallal, Aurelie Levy
+ * Creation: Octobre 2017
+ * But: Gestion de la communication point a point du cote de l'esclave
+ * Envoi le delay request en enregistrant l'heure d'envoi puis la compare avec
+ * l'heure envoyee en reponse par le maitre (delay response)
  */
 package syncrohour;
 
 import java.net.*;
 import java.io.*;
 import java.util.Random;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-/**
- *
- * @author aurel
- */
 public class MessageManager implements Runnable {
 
    //private final int PORT;
    //private final String NAME_MASTER;
-   private final DatagramSocket socket;
-   private final boolean running;
+   private final DatagramSocket SOCKET;
+   private boolean runningPtToPt;
    private long delayMilliSec = 0;
 
    public MessageManager() throws SocketException {
-      //PORT = port;
-      socket = new DatagramSocket();
-      running = true;
+      SOCKET = new DatagramSocket();
+      runningPtToPt = true;
    }
 
    public long getDelay() {
       return delayMilliSec;
    }
-
-   /*public int getPORT() {
-      return PORT;
-   }*/
 
    /**
     * Permet de gérer l'envoi/reception des delay_XXXX Format: delay_request:
@@ -46,8 +39,6 @@ public class MessageManager implements Runnable {
    @Override
    public void run() {
       byte id = 0x00;
-      byte DELAY_REQUEST = 0x03,
-              DELAY_RESPONSE = 0x04;
 
       long timeSendedRequestForSlave;
       long timeReceivedRequestForMaster;
@@ -58,48 +49,53 @@ public class MessageManager implements Runnable {
 
       Random r = new Random();
 
-      while (running) {
-         System.out.println("ICI");
+      while (runningPtToPt) {
          try {
             id++;
-            buffer = new byte[]{DELAY_REQUEST, id};
-            //address = Utils.getNameMaster();
+            buffer = new byte[]{Utils.getDelayRequest(), id};
             address = Utils.getAdressMaster();
-            
-            System.out.println("port : " + address.toString());
-            //packet = new DatagramPacket(buffer, 0, buffer.length, address);
+
+            //System.out.println("port : " + address.toString());
             packet = new DatagramPacket(buffer, buffer.length, address, Utils.getPortMaster());
 
             timeSendedRequestForSlave = System.currentTimeMillis();
-            socket.send(packet);//send DELAY_REQUEST
-            System.out.println("Delay_Request sent id: " + id);
+            SOCKET.send(packet);//envoi du DELAY_REQUEST
+            //System.out.println("Delay_Request sent");
 
             buffer = new byte[10];
             packet = new DatagramPacket(buffer, buffer.length);
-            socket.receive(packet);//recieve delayresponse
-System.out.println("Delay response recieve");
-            //verification that we received DELAY_RESPONSE => name = 0x04
-            if (packet.getData()[0] == DELAY_RESPONSE && packet.getData()[1] == id) {
+            SOCKET.receive(packet);//recieve delayresponse
+            //System.out.println("Delay response recieved");
+            //verification qu'on a recu DELAY_RESPONSE => nom = 0x04
+            if (packet.getData()[0] == Utils.getDelayResponse() && packet.getData()[1] == id) {
                //System.out.println("Delay_response id: " + id);
                timeReceivedRequestForMaster = Utils.getTimeLong(buffer);
 
-               //calcul of the delay (delay = (tm - ts) / 2)
+               //calcul du delai (delay = (tm - ts) / 2)
                delayMilliSec = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
                //System.out.println("delayMilliSec: " + delayMilliSec);
 
             }
 
-//TimeUnit.SECONDS.sleep((Utils.getMIN() + (int) (Math.random() * ((Utils.getMAX() - Utils.getMIN() ) + 1))));
 //VOIR POUR TASK SCHEDULER
             //Utils.waitRandomTime();
-
          } catch (UnknownHostException ex) {
             Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
+//TODO
 
          } catch (IOException ex) {
             Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
+//TODO
          }
       }
-      socket.close();
+      SOCKET.close();
+   }
+
+   public void stop() {
+      runningPtToPt = false;
+   }
+
+   public boolean isRunningPtToPt() {
+      return runningPtToPt;
    }
 }

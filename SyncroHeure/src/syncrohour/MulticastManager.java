@@ -1,7 +1,10 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Fichier: MulticastManage.java
+ * Auteurs: Nadir Benallal, Aurelie Levy
+ * Creation: Octobre 2017
+ * But: Gestion du multicast du cote de l'esclave
+ * Recoit les messages SYNC et FOLLOW_UP du maitre, utilise leur contenu pour
+ * mettre a jour l'heure de l'esclave
  */
 package syncrohour;
 
@@ -19,16 +22,16 @@ public class MulticastManager implements Runnable {
    private final int PORT;
    private final String ADDRESS_GROUP;
    private long gap;
-   private boolean isDoneOnce =  false;
+   private boolean isDoneOnce = false;
    private boolean initiate = false;
-   private final boolean running;
+   private boolean runningMulticast;
 
    private static long timeSlaveMilliSec;
 
    public MulticastManager(int port, String addGrp) {
       PORT = port;
       ADDRESS_GROUP = addGrp;
-      running = true;
+      runningMulticast = true;
       gap = 0;
       isDoneOnce = false;
    }
@@ -59,8 +62,6 @@ public class MulticastManager implements Runnable {
     */
    @Override
    public void run() {
-      byte SYNC = 0x01,
-              FOLLOW_UP = 0x02;
       long timeReceivedForSlave = 0;
       long timeSendedForMaster = 0;
       byte id = 0;
@@ -76,46 +77,43 @@ public class MulticastManager implements Runnable {
          byte[] buffer;
          DatagramPacket packet;
 
-         while (running) {
+         while (runningMulticast) {
             buffer = new byte[10];
             packet = new DatagramPacket(buffer, buffer.length);
             socket.receive(packet);
             buffer = packet.getData();
             //verification of the message
-            if (buffer[0] == SYNC) {
+            if (buffer[0] == Utils.getSync()) {
                timeReceivedForSlave = System.currentTimeMillis();
                //System.out.println("timeReceivedForSlave " + timeReceivedForSlave);
                id = buffer[1];
-               //System.out.println("SYNC id: " + id);
-            } else if (buffer[0] == FOLLOW_UP && buffer[1] == id) {
-               //System.out.println("FollowUp id: " + id);
+               System.out.println("SYNC recieved");
+            } else if (buffer[0] == Utils.getFollowUp() && buffer[1] == id) {
+               System.out.println("FollowUp recieved");
 
                timeSendedForMaster = Utils.getTimeLong(buffer);
 
-               //calcul of the gap (ecart)
+               //calcul de l'ecart
                gap = timeSendedForMaster - timeReceivedForSlave;
                //System.out.println("timeSendedForMaster " + timeSendedForMaster);
-               System.out.println("gap: " + gap);
+               System.out.println("ecart: " + gap);
                isDoneOnce = true;
             }
 
             if (isDoneOnce) {
-               //MessageManager msgM = new MessageManager(2222, "NADIR-PC", min, max);
                if (!initiate) {
                   msgM = new MessageManager();
-                  //Utils.setNameMaster(packet.getSocketAddress());
                   Utils.setAdressMaster(packet.getAddress());
                   Thread threadPtToPT = new Thread(msgM);
-                  //Utils.waitRandomTime();//attente pour la première fois
+//Utils.waitRandomTime();//attente pour la première fois
                   threadPtToPT.start();
-                  //System.out.println("PtToPT running");
                   initiate = true;
                }
 
                long shift = gap + msgM.getDelay();
-               timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
+               timeSlaveMilliSec = System.currentTimeMillis() + shift;//change l'heure courante de l'esclave
                //System.out.println("timeSlaveMilliSec: " + timeSlaveMilliSec);
-               //System.out.println("heure de l'esclave: " + new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
+               System.out.println("heure de l'esclave: " + new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
             }
          }
          socket.leaveGroup(groupe);
@@ -126,4 +124,11 @@ public class MulticastManager implements Runnable {
 
    }
 
+   public void stop() {
+      runningMulticast = false;
+   }
+
+   public boolean isRunningPtToPt() {
+      return runningMulticast;
+   }
 }
