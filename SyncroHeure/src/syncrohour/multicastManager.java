@@ -19,7 +19,7 @@ public class multicastManager implements Runnable {
    private final int PORT;
    private final String ADDRESS_GROUP;
    private long gap;
-   private boolean isDoneOnce;
+   private boolean isDoneOnce =  false;
    private boolean initiate = false;
    private final boolean running;
 
@@ -95,25 +95,27 @@ public class multicastManager implements Runnable {
                //calcul of the gap (ecart)
                gap = timeSendedForMaster - timeReceivedForSlave;
                //System.out.println("timeSendedForMaster " + timeSendedForMaster);
-               System.out.println("gap: " + gap);
+               //System.out.println("gap: " + gap);
                isDoneOnce = true;
             }
 
             if (isDoneOnce) {
                //MessageManager msgM = new MessageManager(2222, "NADIR-PC", min, max);
                if (!initiate) {
-                  msgM = new MessageManager(2222);
-                  Utils.setNameMaster(packet.getSocketAddress());
+                  msgM = new MessageManager();
+                  //Utils.setNameMaster(packet.getSocketAddress());
+                  Utils.setAdressMaster(packet.getAddress());
                   Thread threadPtToPT = new Thread(msgM);
-                  Utils.waitRandomTime();//attente pour la première fois
+                  //Utils.waitRandomTime();//attente pour la première fois
                   threadPtToPT.start();
+                  //System.out.println("PtToPT running");
                   initiate = true;
                }
 
                long shift = gap + msgM.getDelay();
                timeSlaveMilliSec = System.currentTimeMillis() + shift;//change current time of slave
                //System.out.println("timeSlaveMilliSec: " + timeSlaveMilliSec);
-               System.out.println("heure de l'esclave: " + new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
+               //System.out.println("heure de l'esclave: " + new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
             }
          }
          socket.leaveGroup(groupe);

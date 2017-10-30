@@ -18,14 +18,14 @@ import java.util.logging.Logger;
  */
 public class MessageManager implements Runnable {
 
-   private final int PORT;
+   //private final int PORT;
    //private final String NAME_MASTER;
    private final DatagramSocket socket;
    private final boolean running;
    private long delayMilliSec = 0;
 
-   public MessageManager(int port) throws SocketException {
-      PORT = port;
+   public MessageManager() throws SocketException {
+      //PORT = port;
       socket = new DatagramSocket();
       running = true;
    }
@@ -34,9 +34,9 @@ public class MessageManager implements Runnable {
       return delayMilliSec;
    }
 
-   public int getPORT() {
+   /*public int getPORT() {
       return PORT;
-   }
+   }*/
 
    /**
     * Permet de gérer l'envoi/reception des delay_XXXX Format: delay_request:
@@ -51,18 +51,24 @@ public class MessageManager implements Runnable {
 
       long timeSendedRequestForSlave;
       long timeReceivedRequestForMaster;
-      SocketAddress address;
+      //SocketAddress address;
+      InetAddress address;
       DatagramPacket packet;
       byte[] buffer;
 
       Random r = new Random();
 
       while (running) {
+         System.out.println("ICI");
          try {
             id++;
             buffer = new byte[]{DELAY_REQUEST, id};
-            address = Utils.getNameMaster();
-            packet = new DatagramPacket(buffer, 0, buffer.length, address);
+            //address = Utils.getNameMaster();
+            address = Utils.getAdressMaster();
+            
+            System.out.println("port : " + address.toString());
+            //packet = new DatagramPacket(buffer, 0, buffer.length, address);
+            packet = new DatagramPacket(buffer, buffer.length, address, Utils.getPortMaster());
 
             timeSendedRequestForSlave = System.currentTimeMillis();
             socket.send(packet);//send DELAY_REQUEST
@@ -71,20 +77,21 @@ public class MessageManager implements Runnable {
             buffer = new byte[10];
             packet = new DatagramPacket(buffer, buffer.length);
             socket.receive(packet);//recieve delayresponse
-
+System.out.println("Delay response recieve");
             //verification that we received DELAY_RESPONSE => name = 0x04
             if (packet.getData()[0] == DELAY_RESPONSE && packet.getData()[1] == id) {
-               System.out.println("Delay_response id: " + id);
+               //System.out.println("Delay_response id: " + id);
                timeReceivedRequestForMaster = Utils.getTimeLong(buffer);
 
                //calcul of the delay (delay = (tm - ts) / 2)
                delayMilliSec = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
-               System.out.println("delayMilliSec: " + delayMilliSec);
+               //System.out.println("delayMilliSec: " + delayMilliSec);
 
             }
 
 //TimeUnit.SECONDS.sleep((Utils.getMIN() + (int) (Math.random() * ((Utils.getMAX() - Utils.getMIN() ) + 1))));
-            Utils.waitRandomTime();
+//VOIR POUR TASK SCHEDULER
+            //Utils.waitRandomTime();
 
          } catch (UnknownHostException ex) {
             Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);

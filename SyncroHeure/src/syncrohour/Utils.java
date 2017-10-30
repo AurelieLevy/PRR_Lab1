@@ -6,6 +6,7 @@
  */
 package syncrohour;
 
+import java.net.InetAddress;
 import java.net.SocketAddress;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
@@ -18,23 +19,36 @@ import java.util.logging.Logger;
  */
 public class Utils {
 
-   static SocketAddress NAME_MASTER;
+   ///static SocketAddress NAME_MASTER;
+   static InetAddress ADRESS_MASTER;
    static final int MAX = 60;
    static final int MIN = 4;
    static final int K = 2;
    static final String multicastAddress = "239.10.10.1";
+   static final int PORT_MASTER = 2222;
+   
+   static int getPortMaster(){
+      return PORT_MASTER;
+   }
    
    static String getMulticastAddress(){
       return multicastAddress;
    }
 
-   static void setNameMaster(SocketAddress name) {
+   static void setAdressMaster(InetAddress adress){
+      ADRESS_MASTER = adress;
+   }
+   
+   static InetAddress getAdressMaster(){
+      return ADRESS_MASTER;
+   }
+   /*static void setNameMaster(SocketAddress name) {
       NAME_MASTER = name;
-   }
+   }*/
 
-   static SocketAddress getNameMaster() {
+   /*static SocketAddress getNameMaster() {
       return NAME_MASTER;
-   }
+   }*/
 
    static int getMAX() {
       return MAX;
