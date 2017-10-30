@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class multicastManager implements Runnable {
+public class MulticastManager implements Runnable {
 
    private final int PORT;
    private final String ADDRESS_GROUP;
@@ -25,7 +25,7 @@ public class multicastManager implements Runnable {
 
    private static long timeSlaveMilliSec;
 
-   public multicastManager(int port, String addGrp) {
+   public MulticastManager(int port, String addGrp) {
       PORT = port;
       ADDRESS_GROUP = addGrp;
       running = true;
@@ -95,7 +95,7 @@ public class multicastManager implements Runnable {
                //calcul of the gap (ecart)
                gap = timeSendedForMaster - timeReceivedForSlave;
                //System.out.println("timeSendedForMaster " + timeSendedForMaster);
-               //System.out.println("gap: " + gap);
+               System.out.println("gap: " + gap);
                isDoneOnce = true;
             }
 
@@ -121,7 +121,7 @@ public class multicastManager implements Runnable {
          socket.leaveGroup(groupe);
          socket.close();
       } catch (IOException ex) {
-         Logger.getLogger(multicastManager.class.getName()).log(Level.SEVERE, null, ex);
+         Logger.getLogger(MulticastManager.class.getName()).log(Level.SEVERE, null, ex);
       }
 
    }

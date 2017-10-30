@@ -15,7 +15,7 @@ public class SyncroHour_Slave {
     * @param args the command line arguments
     */
    public static void main(String[] args) {
-      multicastManager multiM = new multicastManager(2223, Utils.getMulticastAddress());
+      MulticastManager multiM = new MulticastManager(2223, Utils.getMulticastAddress());
       Thread threadMulticast = new Thread(multiM);
 
       threadMulticast.start();
