@@ -18,7 +18,7 @@ public class MessageManager implements Runnable {
 
    private final DatagramSocket SOCKET;
    private boolean runningPtToPt;
-   private long delay = 0;
+   private long delay;
 
    /**
     * Constructeur du manager point a point de l'esclave
@@ -26,8 +26,9 @@ public class MessageManager implements Runnable {
     * @throws SocketException
     */
    public MessageManager() throws SocketException {
-      SOCKET = new DatagramSocket();
-      runningPtToPt = true;
+      this.SOCKET = new DatagramSocket();
+      this.runningPtToPt = true;
+      this.delay = 0;
    }
 
    /**
@@ -84,12 +85,12 @@ public class MessageManager implements Runnable {
 
                //calcul du delai ( delay = (tm - ts) / 2 )
                delay = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
-               //System.out.println("delayMilliSec: " + delayMilliSec);
+               //System.out.println("delay: " + delay);
 
             }
 
 //VOIR POUR TASK SCHEDULER
-            //Utils.waitRandomTime();
+            Utils.waitRandomTime();
          } catch (IOException ex) {
             Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println("Problem while sending packet");

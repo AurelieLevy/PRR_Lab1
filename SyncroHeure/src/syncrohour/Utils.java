@@ -3,7 +3,8 @@
  * Auteurs: Nadir Benallal, Aurelie Levy
  * Creation: Octobre 2017
  * But: Configuration de l'esclave
- * ATTENTION: doit correspondre a celle du maitre!!!!
+ * ATTENTION: Les valeurs des variables de cette classe doivent
+ * correspondre a celles du maitre!!!!
  */
 package syncrohour;
 
@@ -99,7 +100,7 @@ public class Utils {
    }
 
    /**
-    * Permet de recuperer depuis un tableau de byte un long
+    * Permet de recuperer depuis un tableau de byte de taille 8 un long
     *
     * @param values tableau de byte
     * @return valeur en long

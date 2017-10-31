@@ -22,23 +22,25 @@ public class MulticastManager implements Runnable {
    private final int PORT;
    private final String ADDRESS_GROUP;
    private long gap;
-   private boolean isDoneOnce = false;
-   private boolean initiate = false;
+   private boolean isDoneOnce;
+   private boolean initiate;
    private boolean runningMulticast;
 
    private static long timeSlaveMilliSec;
 
    /**
     * Constructeur du multicast de l'esclave
+    *
     * @param port port
     * @param addGrp adresse du groupe
     */
    public MulticastManager(int port, String addGrp) {
-      PORT = port;
-      ADDRESS_GROUP = addGrp;
-      runningMulticast = true;
-      gap = 0;
-      isDoneOnce = false;
+      this.PORT = port;
+      this.ADDRESS_GROUP = addGrp;
+      this.runningMulticast = true;
+      this.gap = 0;
+      this.isDoneOnce = false;
+      this.initiate = false;
    }
 
    /*
@@ -57,7 +59,7 @@ public class MulticastManager implements Runnable {
       MulticastSocket socket;
       InetAddress groupe;
       MessageManager msgM = null;
-      
+
       try {
          socket = new MulticastSocket(PORT);
          groupe = InetAddress.getByName(ADDRESS_GROUP);
@@ -73,7 +75,7 @@ public class MulticastManager implements Runnable {
             buffer = packet.getData();
             //verification du message
             if (buffer[0] == Utils.getSync()) {
-               
+
                //A DECOMMENTER POUR TESTER
                //timeReceivedForSlave = System.currentTimeMillis() + cstTest;
                timeReceivedForSlave = System.currentTimeMillis();
@@ -82,7 +84,7 @@ public class MulticastManager implements Runnable {
             } else if (buffer[0] == Utils.getFollowUp() && buffer[1] == id) {
                System.out.println("FollowUp recieved");
                timeSendedForMaster = Utils.getTimeLong(buffer);
-               
+
                //calcul de l'ecart (tm - ti)
                gap = timeSendedForMaster - timeReceivedForSlave;
                System.out.println("ecart: " + gap);
@@ -98,7 +100,7 @@ public class MulticastManager implements Runnable {
                   //communication point a point
                   Utils.setAdressMaster(packet.getAddress());
                   Thread threadPtToPT = new Thread(msgM);
-//Utils.waitRandomTime();//attente pour la première fois
+                  Utils.waitRandomTime();//attente pour la première fois
                   threadPtToPT.start();
                   initiate = true;
                }
@@ -106,7 +108,7 @@ public class MulticastManager implements Runnable {
                //calcul du decalage ( ecart(i) + delai(i) )
                long shift = gap + msgM.getDelay();
                System.out.println("shift: " + shift);
-               
+
                //calcul de l'heure locale ( hlocal(i) = hsys(i) + decalage(i)
                timeSlaveMilliSec = (System.currentTimeMillis() + shift);//change l'heure courante de l'esclave
                //timeSlaveMilliSec = (System.currentTimeMillis() + shift + cstTest);
@@ -132,6 +134,7 @@ public class MulticastManager implements Runnable {
 
    /**
     * Permet de savoir si le multicast fonctionne
+    *
     * @return true si oui, false sinon
     */
    public boolean isRunningMulticast() {
