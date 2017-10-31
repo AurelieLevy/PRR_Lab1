@@ -54,7 +54,7 @@ public class MulticastManager implements Runnable {
       long timeSendedForMaster = 0;
       byte id = 0;
       //cette constante permet de tester en local le protocole
-      //long cstTest = 900000000;
+      //long cstTest = 999999999;
 
       MulticastSocket socket;
       InetAddress groupe;
@@ -111,6 +111,8 @@ public class MulticastManager implements Runnable {
 
                //calcul de l'heure locale ( hlocal(i) = hsys(i) + decalage(i)
                timeSlaveMilliSec = (System.currentTimeMillis() + shift);//change l'heure courante de l'esclave
+               
+               //A DECOMMENTER POUR TESTER
                //timeSlaveMilliSec = (System.currentTimeMillis() + shift + cstTest);
                //System.out.println("dec + cst:" + (shift + cstTest)); //vaut 0 si le protocole est bon
                System.out.println("heure de l'esclave: " + new SimpleDateFormat("dd MM yyyy HH:mm:ss").format(new Date(timeSlaveMilliSec)));
