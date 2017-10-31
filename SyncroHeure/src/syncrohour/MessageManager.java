@@ -16,25 +16,33 @@ import java.util.logging.Logger;
 
 public class MessageManager implements Runnable {
 
-   //private final int PORT;
-   //private final String NAME_MASTER;
    private final DatagramSocket SOCKET;
    private boolean runningPtToPt;
-   private long delayMilliSec = 0;
+   private long delay = 0;
 
+   /**
+    * Constructeur du manager point a point de l'esclave
+    *
+    * @throws SocketException
+    */
    public MessageManager() throws SocketException {
       SOCKET = new DatagramSocket();
       runningPtToPt = true;
    }
 
+   /**
+    * Permet de recuperer le dela
+    *
+    * @return un long representant le delai
+    */
    public long getDelay() {
-      return delayMilliSec;
+      return delay;
    }
 
-   /**
-    * Permet de gérer l'envoi/reception des delay_XXXX Format: delay_request:
-    * tableau de byte [nomMsg, id] delay_response: tableau de byte [nomMsg, id,
-    * h]
+   /*
+   Permet de gérer l'envoi/reception des delay_XXXX
+   Format: delay_request:  tableau de byte [nomMsg, id] 
+            delay_response: tableau de byte [nomMsg, id, h]
     */
    @Override
    public void run() {
@@ -42,59 +50,66 @@ public class MessageManager implements Runnable {
 
       long timeSendedRequestForSlave;
       long timeReceivedRequestForMaster;
-      //SocketAddress address;
       InetAddress address;
       DatagramPacket packet;
       byte[] buffer;
 
       Random r = new Random();
 
-      while (runningPtToPt) {
+      while (runningPtToPt) {//tant que le point a point a lieu
          try {
             id++;
             buffer = new byte[]{Utils.getDelayRequest(), id};
+            //recupere l'adresse du maitre recuperee via le multicast
             address = Utils.getAdressMaster();
-
-            //System.out.println("port : " + address.toString());
+            
+            //preparation du paquet
             packet = new DatagramPacket(buffer, buffer.length, address, Utils.getPortMaster());
 
+            //sauvegarde de l'heure d'envoi du message
             timeSendedRequestForSlave = System.currentTimeMillis();
-            SOCKET.send(packet);//envoi du DELAY_REQUEST
+            SOCKET.send(packet);//envoi du delay_request
             //System.out.println("Delay_Request sent");
 
+            //reception du delay_response
             buffer = new byte[10];
             packet = new DatagramPacket(buffer, buffer.length);
-            SOCKET.receive(packet);//recieve delayresponse
+            SOCKET.receive(packet);
             //System.out.println("Delay response recieved");
+            
             //verification qu'on a recu DELAY_RESPONSE => nom = 0x04
             if (packet.getData()[0] == Utils.getDelayResponse() && packet.getData()[1] == id) {
-               //System.out.println("Delay_response id: " + id);
+               //transformation du tableau recu en long
                timeReceivedRequestForMaster = Utils.getTimeLong(buffer);
 
-               //calcul du delai (delay = (tm - ts) / 2)
-               delayMilliSec = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
+               //calcul du delai ( delay = (tm - ts) / 2 )
+               delay = ((timeReceivedRequestForMaster - timeSendedRequestForSlave) / 2);
                //System.out.println("delayMilliSec: " + delayMilliSec);
 
             }
 
 //VOIR POUR TASK SCHEDULER
             //Utils.waitRandomTime();
-         } catch (UnknownHostException ex) {
-            Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
-//TODO
-
          } catch (IOException ex) {
             Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
+            System.err.println("Problem while sending packet");
 //TODO
          }
       }
       SOCKET.close();
    }
 
+   /**
+    * Permet d'arreter le point a point
+    */
    public void stop() {
       runningPtToPt = false;
    }
 
+   /**
+    * permet de savoir l'etat du point a point
+    * @return true si en marche, false sinon
+    */
    public boolean isRunningPtToPt() {
       return runningPtToPt;
    }
