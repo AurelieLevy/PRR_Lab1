@@ -120,11 +120,10 @@ public class Utils {
    public static void waitRandomTime() {
       Random r = new Random();
       try {
-         TimeUnit.SECONDS.sleep((MIN * K + r.nextInt(MAX * K - MIN * K)));
+         TimeUnit.SECONDS.sleep((r.nextInt(MAX) + MIN));
       } catch (InterruptedException ex) {
          Logger.getLogger(Utils.class.getName()).log(Level.SEVERE, null, ex);
          System.err.println("Problem while waiting");
-//TODO
       }
    }
 

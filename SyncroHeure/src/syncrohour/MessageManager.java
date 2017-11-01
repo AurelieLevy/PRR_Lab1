@@ -55,7 +55,6 @@ public class MessageManager implements Runnable {
       DatagramPacket packet;
       byte[] buffer;
 
-      Random r = new Random();
 
       while (runningPtToPt) {//tant que le point a point a lieu
          try {
@@ -63,7 +62,7 @@ public class MessageManager implements Runnable {
             buffer = new byte[]{Utils.getDelayRequest(), id};
             //recupere l'adresse du maitre recuperee via le multicast
             address = Utils.getAdressMaster();
-            
+
             //preparation du paquet
             packet = new DatagramPacket(buffer, buffer.length, address, Utils.getPortMaster());
 
@@ -77,7 +76,7 @@ public class MessageManager implements Runnable {
             packet = new DatagramPacket(buffer, buffer.length);
             SOCKET.receive(packet);
             //System.out.println("Delay response recieved");
-            
+
             //verification qu'on a recu DELAY_RESPONSE => nom = 0x04
             if (packet.getData()[0] == Utils.getDelayResponse() && packet.getData()[1] == id) {
                //transformation du tableau recu en long
@@ -88,13 +87,12 @@ public class MessageManager implements Runnable {
                //System.out.println("delay: " + delay);
 
             }
-
-//VOIR POUR TASK SCHEDULER
+            //attente un temps random [4k,60k]
             Utils.waitRandomTime();
+
          } catch (IOException ex) {
             Logger.getLogger(MessageManager.class.getName()).log(Level.SEVERE, null, ex);
             System.err.println("Problem while sending packet");
-//TODO
          }
       }
       SOCKET.close();
@@ -109,6 +107,7 @@ public class MessageManager implements Runnable {
 
    /**
     * permet de savoir l'etat du point a point
+    *
     * @return true si en marche, false sinon
     */
    public boolean isRunningPtToPt() {
